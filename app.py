@@ -16,11 +16,25 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 PRESETS = load_presets(os.path.join(os.path.dirname(__file__), 'presets.json'))
 
-# session_id -> { 'rotation': int, 'path': str }
-sessions = {}
-
 PREVIEW_SIZE = 1000
 THUMB_SIZE = 150
+
+
+def session_path(sid):
+    return os.path.join(UPLOAD_DIR, sid + '.meta.json')
+
+
+def save_session(sid, data):
+    with open(session_path(sid), 'w') as f:
+        json.dump(data, f)
+
+
+def load_session(sid):
+    p = session_path(sid)
+    if not os.path.exists(p):
+        return None
+    with open(p, 'r') as f:
+        return json.load(f)
 
 
 def img_to_data_uri(img_float, quality=80):
@@ -68,12 +82,12 @@ def upload():
         return jsonify(error='No file selected'), 400
 
     sid = str(uuid.uuid4())
-    path = os.path.join(UPLOAD_DIR, sid + '.jpg')
-    f.save(path)
+    img_path = os.path.join(UPLOAD_DIR, sid + '.jpg')
+    f.save(img_path)
 
-    img = load_image(path, max_size=PREVIEW_SIZE)
-    sessions[sid] = {'rotation': 0, 'path': path}
+    save_session(sid, {'rotation': 0, 'path': img_path})
 
+    img = load_image(img_path, max_size=PREVIEW_SIZE)
     main_uri = img_to_data_uri(img, quality=82)
     return jsonify(session=sid, main=main_uri)
 
@@ -81,10 +95,9 @@ def upload():
 @app.route('/presets-stream')
 def presets_stream():
     sid = request.args.get('session')
-    if sid not in sessions:
+    s = load_session(sid)
+    if not s:
         return jsonify(error='Invalid session'), 400
-
-    s = sessions[sid]
 
     def generate():
         img = load_image(s['path'], max_size=PREVIEW_SIZE)
@@ -115,10 +128,11 @@ def presets_stream():
 def set_rotation():
     data = request.json
     sid = data.get('session')
-    rotation = data.get('rotation', 0)
-    if sid not in sessions:
+    s = load_session(sid)
+    if not s:
         return jsonify(error='Invalid session'), 400
-    sessions[sid]['rotation'] = rotation % 360
+    s['rotation'] = data.get('rotation', 0) % 360
+    save_session(sid, s)
     return jsonify(ok=True)
 
 
@@ -127,10 +141,10 @@ def download():
     data = request.json
     sid = data.get('session')
     preset_name = data.get('preset', 'Original')
-    if sid not in sessions:
+    s = load_session(sid)
+    if not s:
         return jsonify(error='Invalid session'), 400
 
-    s = sessions[sid]
     full_img = load_image(s['path'], max_size=4000)
     rotated = apply_rotation(full_img, s['rotation'])
 
