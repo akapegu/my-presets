@@ -2,13 +2,14 @@ import os
 import uuid
 import io
 import base64
+import json
 import numpy as np
 from PIL import Image
-from flask import Flask, render_template, request, jsonify, send_file
+from flask import Flask, render_template, request, jsonify, send_file, Response, stream_with_context
 from main import apply_preset, load_image, load_presets
 
 app = Flask(__name__)
-app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB
+app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
 
 UPLOAD_DIR = os.path.join(os.path.dirname(__file__), 'uploads')
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -53,23 +54,6 @@ def apply_rotation(img, rotation):
     return img
 
 
-def generate_all_presets(rotated):
-    """Generate preview and thumbnail for every preset."""
-    preview_src = resize_array(rotated, PREVIEW_SIZE)
-    thumb_src = resize_array(rotated, THUMB_SIZE)
-
-    previews = {}
-    thumbnails = {}
-    for name, params in PRESETS.items():
-        thumb_result = apply_preset(thumb_src, params)
-        thumbnails[name] = img_to_data_uri(thumb_result, quality=65)
-
-        preview_result = apply_preset(preview_src, params)
-        previews[name] = img_to_data_uri(preview_result, quality=82)
-
-    return previews, thumbnails
-
-
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -90,28 +74,52 @@ def upload():
     img = load_image(path, max_size=PREVIEW_SIZE)
     sessions[sid] = {'rotation': 0, 'path': path}
 
-    previews, thumbnails = generate_all_presets(img)
+    main_uri = img_to_data_uri(img, quality=82)
+    return jsonify(session=sid, main=main_uri)
 
-    return jsonify(session=sid, previews=previews, thumbnails=thumbnails)
 
-
-@app.route('/rotate', methods=['POST'])
-def rotate():
-    data = request.json
-    sid = data.get('session')
-    direction = data.get('direction', 'cw')
+@app.route('/presets-stream')
+def presets_stream():
+    sid = request.args.get('session')
     if sid not in sessions:
         return jsonify(error='Invalid session'), 400
 
     s = sessions[sid]
-    s['rotation'] = (s['rotation'] + (90 if direction == 'cw' else -90)) % 360
 
-    img = load_image(s['path'], max_size=PREVIEW_SIZE)
-    rotated = apply_rotation(img, s['rotation'])
+    def generate():
+        img = load_image(s['path'], max_size=PREVIEW_SIZE)
+        rotated = apply_rotation(img, s['rotation'])
+        preview_src = resize_array(rotated, PREVIEW_SIZE)
+        thumb_src = resize_array(rotated, THUMB_SIZE)
 
-    previews, thumbnails = generate_all_presets(rotated)
+        for name, params in PRESETS.items():
+            thumb = img_to_data_uri(apply_preset(thumb_src, params), quality=65)
+            preview = img_to_data_uri(apply_preset(preview_src, params), quality=82)
 
-    return jsonify(previews=previews, thumbnails=thumbnails)
+            payload = json.dumps({'name': name, 'thumb': thumb, 'preview': preview})
+            yield f"data: {payload}\n\n"
+
+        yield "data: {\"done\": true}\n\n"
+
+    return Response(
+        stream_with_context(generate()),
+        mimetype='text/event-stream',
+        headers={
+            'Cache-Control': 'no-cache',
+            'X-Accel-Buffering': 'no',
+        }
+    )
+
+
+@app.route('/set-rotation', methods=['POST'])
+def set_rotation():
+    data = request.json
+    sid = data.get('session')
+    rotation = data.get('rotation', 0)
+    if sid not in sessions:
+        return jsonify(error='Invalid session'), 400
+    sessions[sid]['rotation'] = rotation % 360
+    return jsonify(ok=True)
 
 
 @app.route('/download', methods=['POST'])

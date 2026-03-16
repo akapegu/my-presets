@@ -57,6 +57,7 @@
     max-height: 100%;
     object-fit: contain;
     border-radius: 2px;
+    transition: transform 0.2s ease;
   }
 
   .upload-zone {
@@ -75,6 +76,38 @@
   .upload-zone p { font-size: 13px; color: #666; }
   .upload-zone .plus { font-size: 28px; color: #444; line-height: 1; }
 
+  .hints {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+    padding: 0 10px;
+    flex-shrink: 0;
+  }
+  .hints.visible { display: flex; }
+  .hint {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    color: #444;
+  }
+  .key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 20px;
+    padding: 0 5px;
+    border: 1px solid #333;
+    border-radius: 3px;
+    font-size: 9px;
+    color: #555;
+    background: #151515;
+    font-family: inherit;
+    line-height: 1;
+  }
+
   .sidebar {
     width: 200px;
     border-left: 1px solid #222;
@@ -91,7 +124,11 @@
     letter-spacing: 1px;
     color: #666;
     flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
+  .preset-count { font-size: 10px; color: #444; font-weight: normal; letter-spacing: 0; }
   .preset-list {
     flex: 1;
     overflow-y: auto;
@@ -194,13 +231,22 @@
     </div>
     <img id="mainImage" style="display:none" />
     <div class="rotate-controls" id="rotateControls" style="display:none">
-      <button class="rotate-btn" onclick="rotate('ccw')" title="Rotate left">&#x21BA;</button>
-      <button class="rotate-btn" onclick="rotate('cw')" title="Rotate right">&#x21BB;</button>
+      <button class="rotate-btn" onclick="rotateImage(-90)" title="Rotate left">&#x21BA;</button>
+      <button class="rotate-btn" onclick="rotateImage(90)" title="Rotate right">&#x21BB;</button>
     </div>
   </div>
 
+  <div class="hints" id="hints">
+    <div class="hint"><span class="key">Space</span> Original</div>
+    <div class="hint"><span class="key">&uarr;</span> Prev</div>
+    <div class="hint"><span class="key">&darr;</span> Next</div>
+  </div>
+
   <div class="sidebar" id="sidebar">
-    <div class="sidebar-header">Presets</div>
+    <div class="sidebar-header">
+      Presets
+      <span class="preset-count" id="presetCount"></span>
+    </div>
     <div class="preset-list" id="presetList"></div>
   </div>
 </div>
@@ -215,19 +261,40 @@
 <script>
 let sessionId = null;
 let currentPreset = 'Original';
-let previewCache = {};  // preset name -> data URI (full preview)
-let busy = false;
+let previewCache = {};
+let presetStream = null;
+let totalPresets = 51;
+let rotation = 0;
 
 function showLoading(show, text) {
   document.getElementById('loading').classList.toggle('visible', show);
   if (text) document.getElementById('loadingText').textContent = text;
 }
 
+function updateCount(loaded) {
+  const el = document.getElementById('presetCount');
+  if (loaded < totalPresets) {
+    el.textContent = `${loaded}/${totalPresets}`;
+  } else {
+    el.textContent = '';
+  }
+}
+
+function applyRotation() {
+  const img = document.getElementById('mainImage');
+  img.style.transform = `rotate(${rotation}deg)`;
+  // Also rotate all thumbnails
+  document.querySelectorAll('.preset-item img').forEach(el => {
+    el.style.transform = `rotate(${rotation}deg)`;
+  });
+}
+
 async function handleUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
 
-  showLoading(true, 'Generating presets...');
+  showLoading(true, 'Uploading...');
+  rotation = 0;
 
   const form = new FormData();
   form.append('image', file);
@@ -240,35 +307,75 @@ async function handleUpload(e) {
 
     sessionId = data.session;
     currentPreset = 'Original';
-    previewCache = data.previews;
+    previewCache = {};
 
-    document.getElementById('mainImage').src = previewCache['Original'];
-    document.getElementById('mainImage').style.display = 'block';
+    const img = document.getElementById('mainImage');
+    img.src = data.main;
+    img.style.transform = 'rotate(0deg)';
+    img.style.display = 'block';
     document.getElementById('uploadZone').style.display = 'none';
     document.getElementById('rotateControls').style.display = 'flex';
     document.getElementById('sidebar').classList.add('visible');
+    document.getElementById('hints').classList.add('visible');
     document.getElementById('downloadBtn').disabled = false;
+    document.getElementById('presetList').innerHTML = '';
 
-    buildPresetList(data.thumbnails);
-  } catch (err) {
-    alert('Upload failed. Try a smaller image.');
-  } finally {
     showLoading(false);
+    streamPresets(sessionId);
+  } catch (err) {
+    alert('Upload failed');
+    showLoading(false);
+  } finally {
     e.target.value = '';
   }
 }
 
-function buildPresetList(thumbnails) {
-  const list = document.getElementById('presetList');
-  list.innerHTML = '';
-  for (const [name, src] of Object.entries(thumbnails)) {
+function streamPresets(sid) {
+  if (presetStream) presetStream.close();
+
+  let loaded = 0;
+  updateCount(0);
+
+  const es = new EventSource(`/presets-stream?session=${sid}`);
+  presetStream = es;
+
+  es.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+
+    if (data.done) {
+      es.close();
+      presetStream = null;
+      totalPresets = loaded;
+      updateCount(loaded);
+      return;
+    }
+
+    loaded++;
+    updateCount(loaded);
+
+    previewCache[data.name] = data.preview;
+
+    const list = document.getElementById('presetList');
     const item = document.createElement('div');
-    item.className = 'preset-item' + (name === currentPreset ? ' active' : '');
-    item.dataset.name = name;
-    item.innerHTML = `<img src="${src}" /><div class="preset-name">${name}</div>`;
-    item.onclick = () => selectPreset(name);
+    item.className = 'preset-item' + (data.name === currentPreset ? ' active' : '');
+    item.dataset.name = data.name;
+    const thumbImg = document.createElement('img');
+    thumbImg.src = data.thumb;
+    thumbImg.style.transform = `rotate(${rotation}deg)`;
+    const label = document.createElement('div');
+    label.className = 'preset-name';
+    label.textContent = data.name;
+    item.appendChild(thumbImg);
+    item.appendChild(label);
+    item.onclick = () => selectPreset(data.name);
     list.appendChild(item);
-  }
+  };
+
+  es.onerror = function() {
+    es.close();
+    presetStream = null;
+    updateCount(loaded);
+  };
 }
 
 function selectPreset(name) {
@@ -279,38 +386,26 @@ function selectPreset(name) {
     el.classList.toggle('active', el.dataset.name === name);
   });
 
-  // Instant swap from cache — no server call
   document.getElementById('mainImage').src = previewCache[name];
 }
 
-async function rotate(direction) {
-  if (!sessionId || busy) return;
-  busy = true;
-  showLoading(true, 'Rotating...');
-  try {
-    const res = await fetch('/rotate', {
+function rotateImage(deg) {
+  rotation = (rotation + deg) % 360;
+  if (rotation < 0) rotation += 360;
+  applyRotation();
+
+  // Fire-and-forget: tell server about rotation for download
+  if (sessionId) {
+    fetch('/set-rotation', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ session: sessionId, direction })
+      body: JSON.stringify({ session: sessionId, rotation })
     });
-    if (!res.ok) throw new Error('Failed');
-    const data = await res.json();
-
-    previewCache = data.previews;
-    currentPreset = 'Original';
-    document.getElementById('mainImage').src = previewCache['Original'];
-    buildPresetList(data.thumbnails);
-  } catch (err) {
-    alert('Rotation failed');
-  } finally {
-    showLoading(false);
-    busy = false;
   }
 }
 
 async function downloadImage() {
-  if (!sessionId || busy) return;
-  busy = true;
+  if (!sessionId) return;
   const btn = document.getElementById('downloadBtn');
   btn.disabled = true;
   showLoading(true, 'Processing full resolution...');
@@ -339,8 +434,55 @@ async function downloadImage() {
   } finally {
     showLoading(false);
     btn.disabled = false;
-    busy = false;
   }
+}
+
+// Keyboard shortcuts
+let presetBeforeSpace = null;
+
+function getPresetNames() {
+  return Array.from(document.querySelectorAll('.preset-item')).map(el => el.dataset.name);
+}
+
+document.addEventListener('keydown', e => {
+  if (!sessionId) return;
+
+  if (e.code === 'Space') {
+    e.preventDefault();
+    if (!presetBeforeSpace) {
+      presetBeforeSpace = currentPreset;
+      selectPreset('Original');
+    }
+  } else if (e.code === 'ArrowDown') {
+    e.preventDefault();
+    const names = getPresetNames();
+    if (!names.length) return;
+    const idx = names.indexOf(currentPreset);
+    const next = names[Math.min(idx + 1, names.length - 1)];
+    selectPreset(next);
+    scrollToPreset(next);
+  } else if (e.code === 'ArrowUp') {
+    e.preventDefault();
+    const names = getPresetNames();
+    if (!names.length) return;
+    const idx = names.indexOf(currentPreset);
+    const prev = names[Math.max(idx - 1, 0)];
+    selectPreset(prev);
+    scrollToPreset(prev);
+  }
+});
+
+document.addEventListener('keyup', e => {
+  if (e.code === 'Space' && presetBeforeSpace) {
+    e.preventDefault();
+    selectPreset(presetBeforeSpace);
+    presetBeforeSpace = null;
+  }
+});
+
+function scrollToPreset(name) {
+  const el = document.querySelector(`.preset-item[data-name="${name}"]`);
+  if (el) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 }
 
 const mainArea = document.getElementById('mainArea');
