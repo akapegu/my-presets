@@ -15,11 +15,11 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 PRESETS = load_presets(os.path.join(os.path.dirname(__file__), 'presets.json'))
 
-# session_id -> { 'preview': np.array, 'rotation': int, 'path': str }
+# session_id -> { 'rotation': int, 'path': str }
 sessions = {}
 
-PREVIEW_SIZE = 800
-THUMB_SIZE = 120
+PREVIEW_SIZE = 1000
+THUMB_SIZE = 150
 
 
 def img_to_data_uri(img_float, quality=80):
@@ -53,6 +53,23 @@ def apply_rotation(img, rotation):
     return img
 
 
+def generate_all_presets(rotated):
+    """Generate preview and thumbnail for every preset."""
+    preview_src = resize_array(rotated, PREVIEW_SIZE)
+    thumb_src = resize_array(rotated, THUMB_SIZE)
+
+    previews = {}
+    thumbnails = {}
+    for name, params in PRESETS.items():
+        thumb_result = apply_preset(thumb_src, params)
+        thumbnails[name] = img_to_data_uri(thumb_result, quality=65)
+
+        preview_result = apply_preset(preview_src, params)
+        previews[name] = img_to_data_uri(preview_result, quality=82)
+
+    return previews, thumbnails
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -70,20 +87,12 @@ def upload():
     path = os.path.join(UPLOAD_DIR, sid + '.jpg')
     f.save(path)
 
-    preview = load_image(path, max_size=PREVIEW_SIZE)
-    sessions[sid] = {'preview': preview, 'rotation': 0, 'path': path}
+    img = load_image(path, max_size=PREVIEW_SIZE)
+    sessions[sid] = {'rotation': 0, 'path': path}
 
-    rotated = apply_rotation(preview, 0)
-    main_uri = img_to_data_uri(rotated)
+    previews, thumbnails = generate_all_presets(img)
 
-    # Thumbnails from a small source for speed
-    thumb_src = resize_array(rotated, THUMB_SIZE)
-    thumbnails = {}
-    for name, params in PRESETS.items():
-        result = apply_preset(thumb_src, params)
-        thumbnails[name] = img_to_data_uri(result, quality=60)
-
-    return jsonify(session=sid, main=main_uri, thumbnails=thumbnails)
+    return jsonify(session=sid, previews=previews, thumbnails=thumbnails)
 
 
 @app.route('/rotate', methods=['POST'])
@@ -96,37 +105,13 @@ def rotate():
 
     s = sessions[sid]
     s['rotation'] = (s['rotation'] + (90 if direction == 'cw' else -90)) % 360
-    rotated = apply_rotation(s['preview'], s['rotation'])
 
-    main_uri = img_to_data_uri(rotated)
+    img = load_image(s['path'], max_size=PREVIEW_SIZE)
+    rotated = apply_rotation(img, s['rotation'])
 
-    thumb_src = resize_array(rotated, THUMB_SIZE)
-    thumbnails = {}
-    for name, params in PRESETS.items():
-        result = apply_preset(thumb_src, params)
-        thumbnails[name] = img_to_data_uri(result, quality=60)
+    previews, thumbnails = generate_all_presets(rotated)
 
-    return jsonify(main=main_uri, thumbnails=thumbnails)
-
-
-@app.route('/apply', methods=['POST'])
-def apply():
-    data = request.json
-    sid = data.get('session')
-    preset_name = data.get('preset', 'Original')
-    if sid not in sessions:
-        return jsonify(error='Invalid session'), 400
-
-    s = sessions[sid]
-    rotated = apply_rotation(s['preview'], s['rotation'])
-
-    if preset_name in PRESETS:
-        result = apply_preset(rotated, PRESETS[preset_name])
-    else:
-        result = rotated
-
-    main_uri = img_to_data_uri(result, quality=85)
-    return jsonify(main=main_uri)
+    return jsonify(previews=previews, thumbnails=thumbnails)
 
 
 @app.route('/download', methods=['POST'])
@@ -138,7 +123,6 @@ def download():
         return jsonify(error='Invalid session'), 400
 
     s = sessions[sid]
-    # Load original at max 4000px for download (not unlimited)
     full_img = load_image(s['path'], max_size=4000)
     rotated = apply_rotation(full_img, s['rotation'])
 

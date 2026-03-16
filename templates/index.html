@@ -57,9 +57,7 @@
     max-height: 100%;
     object-fit: contain;
     border-radius: 2px;
-    transition: opacity 0.15s;
   }
-  .main-area img.loading-img { opacity: 0.4; }
 
   .upload-zone {
     display: flex;
@@ -217,6 +215,7 @@
 <script>
 let sessionId = null;
 let currentPreset = 'Original';
+let previewCache = {};  // preset name -> data URI (full preview)
 let busy = false;
 
 function showLoading(show, text) {
@@ -228,7 +227,8 @@ async function handleUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
 
-  showLoading(true, 'Uploading and generating presets...');
+  showLoading(true, 'Generating presets...');
+
   const form = new FormData();
   form.append('image', file);
 
@@ -240,10 +240,10 @@ async function handleUpload(e) {
 
     sessionId = data.session;
     currentPreset = 'Original';
+    previewCache = data.previews;
 
-    const img = document.getElementById('mainImage');
-    img.src = data.main;
-    img.style.display = 'block';
+    document.getElementById('mainImage').src = previewCache['Original'];
+    document.getElementById('mainImage').style.display = 'block';
     document.getElementById('uploadZone').style.display = 'none';
     document.getElementById('rotateControls').style.display = 'flex';
     document.getElementById('sidebar').classList.add('visible');
@@ -251,7 +251,7 @@ async function handleUpload(e) {
 
     buildPresetList(data.thumbnails);
   } catch (err) {
-    alert('Upload failed: ' + err.message);
+    alert('Upload failed. Try a smaller image.');
   } finally {
     showLoading(false);
     e.target.value = '';
@@ -271,33 +271,16 @@ function buildPresetList(thumbnails) {
   }
 }
 
-async function selectPreset(name) {
-  if (!sessionId || busy) return;
+function selectPreset(name) {
+  if (!sessionId || !previewCache[name]) return;
   currentPreset = name;
 
   document.querySelectorAll('.preset-item').forEach(el => {
     el.classList.toggle('active', el.dataset.name === name);
   });
 
-  const img = document.getElementById('mainImage');
-  img.classList.add('loading-img');
-  busy = true;
-
-  try {
-    const res = await fetch('/apply', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ session: sessionId, preset: name })
-    });
-    if (!res.ok) throw new Error('Failed');
-    const data = await res.json();
-    img.src = data.main;
-  } catch (err) {
-    alert('Failed to apply preset');
-  } finally {
-    img.classList.remove('loading-img');
-    busy = false;
-  }
+  // Instant swap from cache — no server call
+  document.getElementById('mainImage').src = previewCache[name];
 }
 
 async function rotate(direction) {
@@ -312,8 +295,10 @@ async function rotate(direction) {
     });
     if (!res.ok) throw new Error('Failed');
     const data = await res.json();
-    document.getElementById('mainImage').src = data.main;
+
+    previewCache = data.previews;
     currentPreset = 'Original';
+    document.getElementById('mainImage').src = previewCache['Original'];
     buildPresetList(data.thumbnails);
   } catch (err) {
     alert('Rotation failed');
@@ -336,10 +321,10 @@ async function downloadImage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ session: sessionId, preset: currentPreset })
     });
-    if (!res.ok) throw new Error('Download failed');
+    if (!res.ok) throw new Error('Server error');
 
     const blob = await res.blob();
-    if (blob.size < 1000) throw new Error('File too small, processing may have failed');
+    if (blob.size < 1000) throw new Error('Processing failed');
 
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -350,7 +335,7 @@ async function downloadImage() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   } catch (err) {
-    alert('Download failed: ' + err.message);
+    alert('Download failed — try again');
   } finally {
     showLoading(false);
     btn.disabled = false;
