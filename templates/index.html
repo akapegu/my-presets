@@ -382,7 +382,8 @@ function applyRotation() {
   document.querySelectorAll('.preset-item img').forEach(el => {
     el.style.transform = `rotate(${rotation}deg)`;
   });
-  const isVertical = (rotation % 360 === 90 || rotation % 360 === 270);
+  const norm = ((rotation % 360) + 360) % 360;
+  const isVertical = (norm === 90 || norm === 270);
   document.getElementById('presetList').classList.toggle('rotated-vertical', isVertical);
 }
 
@@ -515,51 +516,28 @@ function selectPreset(name) {
 }
 
 function rotateImage(deg) {
-  rotation = (rotation + deg) % 360;
-  if (rotation < 0) rotation += 360;
+  rotation += deg;  // accumulate without modulo so CSS transition always goes one direction
   applyRotation();
 
-  // Fire-and-forget: tell server about rotation for download
   if (sessionId) {
+    const serverRot = ((rotation % 360) + 360) % 360;
     fetch('/set-rotation', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ session: sessionId, rotation })
+      body: JSON.stringify({ session: sessionId, rotation: serverRot })
     });
   }
 }
 
-async function downloadImage() {
+function downloadImage() {
   if (!sessionId) return;
-  const btn = document.getElementById('downloadBtn');
-  btn.disabled = true;
-  showLoading(true, 'Processing full resolution...');
-
-  try {
-    const res = await fetch('/download', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ session: sessionId, preset: currentPreset, intensity: intensity / 100 })
-    });
-    if (!res.ok) throw new Error('Server error');
-
-    const blob = await res.blob();
-    if (blob.size < 1000) throw new Error('Processing failed');
-
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `edited_${currentPreset.replace(/ /g, '_')}.png`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  } catch (err) {
-    alert('Download failed — try again');
-  } finally {
-    showLoading(false);
-    btn.disabled = false;
-  }
+  const params = new URLSearchParams({
+    session: sessionId,
+    preset: currentPreset,
+    intensity: intensity / 100
+  });
+  // Direct browser navigation — no fetch timeout issues
+  window.location.href = `/download?${params.toString()}`;
 }
 
 // Keyboard shortcuts

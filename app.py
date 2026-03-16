@@ -136,19 +136,18 @@ def set_rotation():
     return jsonify(ok=True)
 
 
-@app.route('/download', methods=['POST'])
+@app.route('/download')
 def download():
-    data = request.json
-    sid = data.get('session')
-    preset_name = data.get('preset', 'Original')
+    sid = request.args.get('session')
+    preset_name = request.args.get('preset', 'Original')
+    intensity = float(request.args.get('intensity', 1.0))
+
     s = load_session(sid)
     if not s:
-        return jsonify(error='Invalid session'), 400
+        return 'Invalid session', 400
 
     full_img = load_image(s['path'], max_size=4000)
     rotated = apply_rotation(full_img, s['rotation'])
-
-    intensity = data.get('intensity', 1.0)
 
     if preset_name in PRESETS and preset_name != 'Original':
         preset_result = apply_preset(rotated, PRESETS[preset_name])
