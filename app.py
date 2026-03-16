@@ -5,7 +5,7 @@ import base64
 import json
 import numpy as np
 from PIL import Image
-from flask import Flask, render_template, request, jsonify, send_file, Response, stream_with_context
+from flask import Flask, render_template, request, jsonify, send_file, Response, stream_with_context, make_response
 from main import apply_preset, load_image, load_presets
 
 app = Flask(__name__)
@@ -162,7 +162,11 @@ def download():
     buf.seek(0)
 
     filename = f"edited_{preset_name.replace(' ', '_')}.png"
-    return send_file(buf, mimetype='image/png', as_attachment=True, download_name=filename)
+    response = make_response(send_file(buf, mimetype='image/png', as_attachment=True, download_name=filename))
+    token = request.args.get('token', '')
+    if token:
+        response.set_cookie('dl_token', token, path='/', max_age=30)
+    return response
 
 
 if __name__ == '__main__':

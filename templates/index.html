@@ -297,6 +297,17 @@
   .loading-text { font-size: 12px; color: #666; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  .btn-spinner {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 1.5px solid #666;
+    border-top-color: #000;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    vertical-align: middle;
+  }
+
   #fileInput { display: none; }
 </style>
 </head>
@@ -306,7 +317,10 @@
   <h1>PRESET</h1>
   <div class="topbar-actions">
     <button class="btn" id="uploadBtn" onclick="document.getElementById('fileInput').click()">Upload</button>
-    <button class="btn btn-primary" id="downloadBtn" disabled onclick="downloadImage()">Download</button>
+    <button class="btn btn-primary" id="downloadBtn" disabled onclick="downloadImage()">
+      <span id="dlText">Download</span>
+      <span id="dlSpinner" class="btn-spinner" style="display:none"></span>
+    </button>
   </div>
 </div>
 
@@ -531,13 +545,54 @@ function rotateImage(deg) {
 
 function downloadImage() {
   if (!sessionId) return;
+
+  const btn = document.getElementById('downloadBtn');
+  const dlText = document.getElementById('dlText');
+  const dlSpinner = document.getElementById('dlSpinner');
+
+  btn.disabled = true;
+  dlText.textContent = 'Processing';
+  dlSpinner.style.display = 'inline-block';
+
+  const token = Date.now().toString();
   const params = new URLSearchParams({
     session: sessionId,
     preset: currentPreset,
-    intensity: intensity / 100
+    intensity: intensity / 100,
+    token: token
   });
-  // Direct browser navigation — no fetch timeout issues
-  window.location.href = `/download?${params.toString()}`;
+
+  // Clear any previous cookie
+  document.cookie = 'dl_token=; path=/; max-age=0';
+
+  // Start download via iframe to avoid navigating away
+  let iframe = document.getElementById('dlFrame');
+  if (!iframe) {
+    iframe = document.createElement('iframe');
+    iframe.id = 'dlFrame';
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+  }
+  iframe.src = `/download?${params.toString()}`;
+
+  // Poll for the cookie the server sets when the file is ready
+  const poll = setInterval(() => {
+    if (document.cookie.includes('dl_token=' + token)) {
+      clearInterval(poll);
+      document.cookie = 'dl_token=; path=/; max-age=0';
+      btn.disabled = false;
+      dlText.textContent = 'Download';
+      dlSpinner.style.display = 'none';
+    }
+  }, 500);
+
+  // Fallback: restore after 60s regardless
+  setTimeout(() => {
+    clearInterval(poll);
+    btn.disabled = false;
+    dlText.textContent = 'Download';
+    dlSpinner.style.display = 'none';
+  }, 60000);
 }
 
 // Keyboard shortcuts
