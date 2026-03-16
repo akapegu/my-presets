@@ -228,7 +228,7 @@
     align-items: center;
     justify-content: center;
   }
-  .preset-item img { width: 100%; border-radius: 2px; display: block; }
+  .preset-item img { width: 100%; border-radius: 2px; display: block; transition: none !important; }
   .preset-list.rotated-vertical .preset-item .thumb-wrap {
     aspect-ratio: 1;
   }
@@ -390,13 +390,19 @@ function updateCount(loaded) {
   }
 }
 
+function normalizedRotation() {
+  return ((rotation % 360) + 360) % 360;
+}
+
 function applyRotation() {
+  // Main images use accumulated value so CSS transition always goes the right direction
   document.getElementById('baseImage').style.transform = `rotate(${rotation}deg)`;
   document.getElementById('overlayImage').style.transform = `rotate(${rotation}deg)`;
+  // Thumbnails use normalized value, no transition
+  const norm = normalizedRotation();
   document.querySelectorAll('.preset-item img').forEach(el => {
-    el.style.transform = `rotate(${rotation}deg)`;
+    el.style.transform = `rotate(${norm}deg)`;
   });
-  const norm = ((rotation % 360) + 360) % 360;
   const isVertical = (norm === 90 || norm === 270);
   document.getElementById('presetList').classList.toggle('rotated-vertical', isVertical);
 }
@@ -428,6 +434,18 @@ async function handleUpload(e) {
 
   showLoading(true, 'Uploading...');
   rotation = 0;
+
+  // Reset transforms instantly (no transition) to avoid stale spins
+  const baseImg = document.getElementById('baseImage');
+  const overlayImg = document.getElementById('overlayImage');
+  baseImg.style.transition = 'none';
+  overlayImg.style.transition = 'none';
+  baseImg.style.transform = 'rotate(0deg)';
+  overlayImg.style.transform = 'rotate(0deg)';
+  // Force reflow then restore transition
+  baseImg.offsetHeight;
+  baseImg.style.transition = '';
+  overlayImg.style.transition = '';
 
   const form = new FormData();
   form.append('image', file);
@@ -500,7 +518,7 @@ function streamPresets(sid) {
     wrap.className = 'thumb-wrap';
     const thumbImg = document.createElement('img');
     thumbImg.src = data.thumb;
-    thumbImg.style.transform = `rotate(${rotation}deg)`;
+    thumbImg.style.transform = `rotate(${normalizedRotation()}deg)`;
     wrap.appendChild(thumbImg);
     const label = document.createElement('div');
     label.className = 'preset-name';
