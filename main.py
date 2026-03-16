@@ -12,9 +12,7 @@ Covers:
   - Sharpening
 """
 
-import sys
 import numpy as np
-import matplotlib.pyplot as plt
 from PIL import Image, ImageFilter
 import math
 import os
@@ -342,78 +340,6 @@ def load_image(path, max_size=1024):
     return np.array(img, dtype=np.float32) / 255.0
  
 
-def make_test_image(size=512):
-    """
-    Generates a synthetic test image if no path is provided.
-    Contains a gradient background + coloured circles so
-    colour/tone effects are clearly visible.
-    """
-    h = w = size
-    img = np.zeros((h, w, 3), dtype=np.float32)
-
-    # Gradient background: warm top-left to cool bottom-right
-    for i in range(h):
-        for j in range(w):
-            img[i, j, 0] = j / w                     # R increases left→right
-            img[i, j, 1] = 0.3 + 0.4 * (i / h)      # G increases top→bottom
-            img[i, j, 2] = 1.0 - (j / w)             # B decreases left→right
-
-    # Add coloured circles
-    cx, cy = w // 2, h // 2
-    ys, xs = np.ogrid[:h, :w]
-
-    circles = [
-        (cx - w//4, cy - h//4, w//7, [1.0, 0.2, 0.2]),  # red
-        (cx + w//4, cy - h//4, w//7, [0.2, 0.8, 0.2]),  # green
-        (cx,        cy + h//4, w//7, [0.2, 0.4, 1.0]),  # blue
-        (cx - w//4, cy + h//4, w//7, [1.0, 0.9, 0.1]),  # yellow
-        (cx + w//4, cy + h//4, w//7, [0.9, 0.2, 0.9]),  # magenta
-    ]
-    for (px, py, r, colour) in circles:
-        mask = ((xs - px)**2 + (ys - py)**2) < r**2
-        for c, v in enumerate(colour):
-            img[mask, c] = v
-
-    # Add a bright white circle in centre
-    mask_c = ((xs - cx)**2 + (ys - cy)**2) < (w//10)**2
-    img[mask_c] = [1.0, 1.0, 1.0]
-
-    return img
-
-
-# ─────────────────────────────────────────────
-#  PLOT
-# ─────────────────────────────────────────────
-
-def plot_presets(img_float, presets, cols=4):
-    n = len(presets)
-    rows = math.ceil(n / cols)
-
-    fig, axes = plt.subplots(rows, cols,
-                             figsize=(cols * 4, rows * 3.6),
-                             facecolor="#111111")
-    axes = axes.flatten()
-
-    for ax in axes:
-        ax.axis("off")
-
-    for idx, (name, params) in enumerate(presets.items()):
-        result = apply_preset(img_float, params)
-        result_uint8 = (result * 255).clip(0, 255).astype(np.uint8)
-
-        axes[idx].imshow(result_uint8)
-        axes[idx].set_title(name, color="white",
-                            fontsize=11, fontweight="bold", pad=6)
-        axes[idx].axis("off")
-
-    plt.suptitle("Image Presets", color="white",
-                 fontsize=16, fontweight="bold", y=1.01)
-    plt.tight_layout(pad=1.2)
-    # plt.savefig("presets_output.png", dpi=150,
-    #             bbox_inches="tight", facecolor="#111111")
-    # print("Saved → presets_output.png")
-    plt.show()
-
 def load_presets(json_path="presets.json"):
     """
     Load presets from a JSON file.
@@ -441,15 +367,3 @@ def load_presets(json_path="presets.json"):
     print(f"Loaded {len(presets)} presets from '{json_path}'")
     return presets
 
-if __name__ == '__main__':
-    imgs = os.listdir('images_j')
-    for i in imgs:
-        image_path = f'images_j/{i}'
-        print(f"Loading image: {image_path}")
-        img = load_image(image_path)
-        json_path ="presets.json"
-        PRESETS = load_presets(json_path)
-
-        print(f"Image shape: {img.shape}  dtype: {img.dtype}")
-        print(f"Applying {len(PRESETS)} presets…")
-        plot_presets(img, PRESETS, cols=4)
