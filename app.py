@@ -134,8 +134,11 @@ def download():
     full_img = load_image(s['path'], max_size=4000)
     rotated = apply_rotation(full_img, s['rotation'])
 
-    if preset_name in PRESETS:
-        result = apply_preset(rotated, PRESETS[preset_name])
+    intensity = data.get('intensity', 1.0)
+
+    if preset_name in PRESETS and preset_name != 'Original':
+        preset_result = apply_preset(rotated, PRESETS[preset_name])
+        result = rotated * (1 - intensity) + preset_result * intensity
     else:
         result = rotated
 
