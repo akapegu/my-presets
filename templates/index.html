@@ -14,104 +14,81 @@
     overflow: hidden;
   }
 
-  /* Top bar */
   .topbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 24px;
+    padding: 10px 20px;
     border-bottom: 1px solid #222;
-    height: 56px;
+    height: 48px;
   }
-  .topbar h1 {
-    font-size: 16px;
-    font-weight: 500;
-    letter-spacing: 0.5px;
-    color: #fff;
-  }
-  .topbar-actions {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
+  .topbar h1 { font-size: 14px; font-weight: 500; letter-spacing: 0.5px; color: #fff; }
+  .topbar-actions { display: flex; gap: 8px; align-items: center; }
 
-  /* Buttons */
   .btn {
     background: transparent;
     border: 1px solid #333;
     color: #ccc;
-    padding: 6px 14px;
-    font-size: 13px;
+    padding: 5px 12px;
+    font-size: 12px;
     cursor: pointer;
     border-radius: 4px;
     transition: all 0.15s;
     font-family: inherit;
   }
   .btn:hover { border-color: #666; color: #fff; }
-  .btn:disabled { opacity: 0.3; cursor: default; }
-  .btn-primary {
-    background: #fff;
-    color: #000;
-    border-color: #fff;
-  }
+  .btn:disabled { opacity: 0.3; cursor: default; pointer-events: none; }
+  .btn-primary { background: #fff; color: #000; border-color: #fff; }
   .btn-primary:hover { background: #ddd; border-color: #ddd; }
 
-  /* Layout */
-  .workspace {
-    display: flex;
-    height: calc(100vh - 56px);
-  }
+  .workspace { display: flex; height: calc(100vh - 48px); }
 
-  /* Main image area */
   .main-area {
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px;
+    padding: 20px;
     position: relative;
+    min-width: 0;
   }
   .main-area img {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
     border-radius: 2px;
+    transition: opacity 0.15s;
   }
+  .main-area img.loading-img { opacity: 0.4; }
 
-  /* Upload state */
   .upload-zone {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 16px;
+    gap: 12px;
     border: 1px dashed #333;
     border-radius: 8px;
-    padding: 60px 40px;
+    padding: 48px 32px;
     cursor: pointer;
     transition: border-color 0.2s;
   }
   .upload-zone:hover { border-color: #666; }
-  .upload-zone p { font-size: 14px; color: #666; }
-  .upload-zone .plus {
-    font-size: 32px;
-    color: #444;
-    line-height: 1;
-  }
+  .upload-zone p { font-size: 13px; color: #666; }
+  .upload-zone .plus { font-size: 28px; color: #444; line-height: 1; }
 
-  /* Preset sidebar */
   .sidebar {
-    width: 280px;
+    width: 200px;
     border-left: 1px solid #222;
-    display: flex;
-    flex-direction: column;
     display: none;
+    flex-direction: column;
+    flex-shrink: 0;
   }
   .sidebar.visible { display: flex; }
   .sidebar-header {
-    padding: 14px 16px;
+    padding: 10px 12px;
     border-bottom: 1px solid #222;
-    font-size: 12px;
+    font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 1px;
     color: #666;
@@ -120,34 +97,27 @@
   .preset-list {
     flex: 1;
     overflow-y: auto;
-    padding: 8px;
+    padding: 6px;
   }
-  .preset-list::-webkit-scrollbar { width: 4px; }
+  .preset-list::-webkit-scrollbar { width: 3px; }
   .preset-list::-webkit-scrollbar-track { background: transparent; }
   .preset-list::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
 
   .preset-item {
     cursor: pointer;
-    padding: 6px;
-    border-radius: 4px;
-    margin-bottom: 4px;
+    padding: 4px;
+    border-radius: 3px;
+    margin-bottom: 3px;
     transition: background 0.15s;
     border: 2px solid transparent;
   }
   .preset-item:hover { background: #1a1a1a; }
-  .preset-item.active {
-    border-color: #fff;
-    background: #1a1a1a;
-  }
-  .preset-item img {
-    width: 100%;
-    border-radius: 2px;
-    display: block;
-  }
+  .preset-item.active { border-color: #fff; background: #1a1a1a; }
+  .preset-item img { width: 100%; border-radius: 2px; display: block; }
   .preset-item .preset-name {
-    font-size: 11px;
-    color: #888;
-    margin-top: 4px;
+    font-size: 10px;
+    color: #666;
+    margin-top: 3px;
     text-align: center;
     white-space: nowrap;
     overflow: hidden;
@@ -155,28 +125,27 @@
   }
   .preset-item.active .preset-name { color: #fff; }
 
-  /* Rotation controls */
   .rotate-controls {
     position: absolute;
-    bottom: 20px;
+    bottom: 16px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
     gap: 4px;
     background: rgba(0,0,0,0.7);
-    padding: 4px;
-    border-radius: 6px;
+    padding: 3px;
+    border-radius: 5px;
     border: 1px solid #333;
   }
   .rotate-btn {
     background: transparent;
     border: none;
     color: #ccc;
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     cursor: pointer;
-    border-radius: 4px;
-    font-size: 16px;
+    border-radius: 3px;
+    font-size: 15px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -184,28 +153,28 @@
   }
   .rotate-btn:hover { background: #333; color: #fff; }
 
-  /* Loading overlay */
   .loading {
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,0.8);
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     z-index: 100;
-    display: none;
+    flex-direction: column;
+    gap: 10px;
   }
   .loading.visible { display: flex; }
   .spinner {
-    width: 24px; height: 24px;
+    width: 22px; height: 22px;
     border: 2px solid #333;
     border-top-color: #fff;
     border-radius: 50%;
     animation: spin 0.6s linear infinite;
   }
+  .loading-text { font-size: 12px; color: #666; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* Hidden file input */
   #fileInput { display: none; }
 </style>
 </head>
@@ -240,6 +209,7 @@
 
 <div class="loading" id="loading">
   <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">Processing...</div>
 </div>
 
 <input type="file" id="fileInput" accept="image/*" onchange="handleUpload(event)" />
@@ -247,29 +217,33 @@
 <script>
 let sessionId = null;
 let currentPreset = 'Original';
+let busy = false;
 
-function showLoading(show) {
+function showLoading(show, text) {
   document.getElementById('loading').classList.toggle('visible', show);
+  if (text) document.getElementById('loadingText').textContent = text;
 }
 
 async function handleUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
 
-  showLoading(true);
+  showLoading(true, 'Uploading and generating presets...');
   const form = new FormData();
   form.append('image', file);
 
   try {
     const res = await fetch('/upload', { method: 'POST', body: form });
+    if (!res.ok) throw new Error('Upload failed');
     const data = await res.json();
     if (data.error) { alert(data.error); return; }
 
     sessionId = data.session;
     currentPreset = 'Original';
 
-    document.getElementById('mainImage').src = data.main;
-    document.getElementById('mainImage').style.display = 'block';
+    const img = document.getElementById('mainImage');
+    img.src = data.main;
+    img.style.display = 'block';
     document.getElementById('uploadZone').style.display = 'none';
     document.getElementById('rotateControls').style.display = 'flex';
     document.getElementById('sidebar').classList.add('visible');
@@ -277,7 +251,7 @@ async function handleUpload(e) {
 
     buildPresetList(data.thumbnails);
   } catch (err) {
-    alert('Upload failed');
+    alert('Upload failed: ' + err.message);
   } finally {
     showLoading(false);
     e.target.value = '';
@@ -298,38 +272,45 @@ function buildPresetList(thumbnails) {
 }
 
 async function selectPreset(name) {
-  if (!sessionId) return;
+  if (!sessionId || busy) return;
   currentPreset = name;
 
   document.querySelectorAll('.preset-item').forEach(el => {
     el.classList.toggle('active', el.dataset.name === name);
   });
 
-  showLoading(true);
+  const img = document.getElementById('mainImage');
+  img.classList.add('loading-img');
+  busy = true;
+
   try {
     const res = await fetch('/apply', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ session: sessionId, preset: name })
     });
+    if (!res.ok) throw new Error('Failed');
     const data = await res.json();
-    document.getElementById('mainImage').src = data.main;
+    img.src = data.main;
   } catch (err) {
     alert('Failed to apply preset');
   } finally {
-    showLoading(false);
+    img.classList.remove('loading-img');
+    busy = false;
   }
 }
 
 async function rotate(direction) {
-  if (!sessionId) return;
-  showLoading(true);
+  if (!sessionId || busy) return;
+  busy = true;
+  showLoading(true, 'Rotating...');
   try {
     const res = await fetch('/rotate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ session: sessionId, direction })
     });
+    if (!res.ok) throw new Error('Failed');
     const data = await res.json();
     document.getElementById('mainImage').src = data.main;
     currentPreset = 'Original';
@@ -338,33 +319,45 @@ async function rotate(direction) {
     alert('Rotation failed');
   } finally {
     showLoading(false);
+    busy = false;
   }
 }
 
 async function downloadImage() {
-  if (!sessionId) return;
-  showLoading(true);
+  if (!sessionId || busy) return;
+  busy = true;
+  const btn = document.getElementById('downloadBtn');
+  btn.disabled = true;
+  showLoading(true, 'Processing full resolution...');
+
   try {
     const res = await fetch('/download', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ session: sessionId, preset: currentPreset })
     });
+    if (!res.ok) throw new Error('Download failed');
+
     const blob = await res.blob();
+    if (blob.size < 1000) throw new Error('File too small, processing may have failed');
+
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `edited_${currentPreset.replace(/ /g, '_')}.jpg`;
+    a.download = `edited_${currentPreset.replace(/ /g, '_')}.png`;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
     URL.revokeObjectURL(url);
   } catch (err) {
-    alert('Download failed');
+    alert('Download failed: ' + err.message);
   } finally {
     showLoading(false);
+    btn.disabled = false;
+    busy = false;
   }
 }
 
-// Drag & drop on upload zone
 const mainArea = document.getElementById('mainArea');
 mainArea.addEventListener('dragover', e => { e.preventDefault(); });
 mainArea.addEventListener('drop', e => {

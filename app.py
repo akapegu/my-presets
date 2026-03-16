@@ -1,10 +1,9 @@
 import os
 import uuid
-import json
 import io
 import base64
 import numpy as np
-from PIL import Image, ImageFilter
+from PIL import Image
 from flask import Flask, render_template, request, jsonify, send_file
 from main import apply_preset, load_image, load_presets
 
@@ -16,11 +15,14 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 PRESETS = load_presets(os.path.join(os.path.dirname(__file__), 'presets.json'))
 
-# In-memory store: session_id -> { 'original': np.array, 'rotation': int }
+# session_id -> { 'preview': np.array, 'rotation': int, 'path': str }
 sessions = {}
 
+PREVIEW_SIZE = 800
+THUMB_SIZE = 120
 
-def img_to_data_uri(img_float, quality=85):
+
+def img_to_data_uri(img_float, quality=80):
     uint8 = (np.clip(img_float, 0, 1) * 255).astype(np.uint8)
     pil = Image.fromarray(uint8)
     buf = io.BytesIO()
@@ -29,19 +31,7 @@ def img_to_data_uri(img_float, quality=85):
     return f'data:image/jpeg;base64,{b64}'
 
 
-def get_rotated(session):
-    img = session['original']
-    rot = session['rotation'] % 360
-    if rot == 90:
-        img = np.rot90(img, k=3)
-    elif rot == 180:
-        img = np.rot90(img, k=2)
-    elif rot == 270:
-        img = np.rot90(img, k=1)
-    return img
-
-
-def make_thumbnail(img_float, max_size=200):
+def resize_array(img_float, max_size):
     h, w = img_float.shape[:2]
     if max(h, w) <= max_size:
         return img_float
@@ -50,6 +40,17 @@ def make_thumbnail(img_float, max_size=200):
     pil = Image.fromarray((np.clip(img_float, 0, 1) * 255).astype(np.uint8))
     pil = pil.resize((new_w, new_h), Image.LANCZOS)
     return np.array(pil, dtype=np.float32) / 255.0
+
+
+def apply_rotation(img, rotation):
+    rot = rotation % 360
+    if rot == 90:
+        return np.rot90(img, k=3)
+    elif rot == 180:
+        return np.rot90(img, k=2)
+    elif rot == 270:
+        return np.rot90(img, k=1)
+    return img
 
 
 @app.route('/')
@@ -69,18 +70,18 @@ def upload():
     path = os.path.join(UPLOAD_DIR, sid + '.jpg')
     f.save(path)
 
-    img = load_image(path, max_size=1200)
-    sessions[sid] = {'original': img, 'rotation': 0, 'path': path}
+    preview = load_image(path, max_size=PREVIEW_SIZE)
+    sessions[sid] = {'preview': preview, 'rotation': 0, 'path': path}
 
-    rotated = get_rotated(sessions[sid])
+    rotated = apply_rotation(preview, 0)
     main_uri = img_to_data_uri(rotated)
 
-    # Generate thumbnails for all presets
-    thumb_src = make_thumbnail(rotated)
+    # Thumbnails from a small source for speed
+    thumb_src = resize_array(rotated, THUMB_SIZE)
     thumbnails = {}
     for name, params in PRESETS.items():
         result = apply_preset(thumb_src, params)
-        thumbnails[name] = img_to_data_uri(result, quality=70)
+        thumbnails[name] = img_to_data_uri(result, quality=60)
 
     return jsonify(session=sid, main=main_uri, thumbnails=thumbnails)
 
@@ -93,16 +94,17 @@ def rotate():
     if sid not in sessions:
         return jsonify(error='Invalid session'), 400
 
-    sessions[sid]['rotation'] = (sessions[sid]['rotation'] + (90 if direction == 'cw' else -90)) % 360
-    rotated = get_rotated(sessions[sid])
+    s = sessions[sid]
+    s['rotation'] = (s['rotation'] + (90 if direction == 'cw' else -90)) % 360
+    rotated = apply_rotation(s['preview'], s['rotation'])
 
     main_uri = img_to_data_uri(rotated)
 
-    thumb_src = make_thumbnail(rotated)
+    thumb_src = resize_array(rotated, THUMB_SIZE)
     thumbnails = {}
     for name, params in PRESETS.items():
         result = apply_preset(thumb_src, params)
-        thumbnails[name] = img_to_data_uri(result, quality=70)
+        thumbnails[name] = img_to_data_uri(result, quality=60)
 
     return jsonify(main=main_uri, thumbnails=thumbnails)
 
@@ -115,13 +117,15 @@ def apply():
     if sid not in sessions:
         return jsonify(error='Invalid session'), 400
 
-    rotated = get_rotated(sessions[sid])
+    s = sessions[sid]
+    rotated = apply_rotation(s['preview'], s['rotation'])
+
     if preset_name in PRESETS:
         result = apply_preset(rotated, PRESETS[preset_name])
     else:
         result = rotated
 
-    main_uri = img_to_data_uri(result, quality=92)
+    main_uri = img_to_data_uri(result, quality=85)
     return jsonify(main=main_uri)
 
 
@@ -133,10 +137,10 @@ def download():
     if sid not in sessions:
         return jsonify(error='Invalid session'), 400
 
-    # Load full-size original for download
-    full_img = load_image(sessions[sid]['path'], max_size=99999)
-    session_copy = {'original': full_img, 'rotation': sessions[sid]['rotation']}
-    rotated = get_rotated(session_copy)
+    s = sessions[sid]
+    # Load original at max 4000px for download (not unlimited)
+    full_img = load_image(s['path'], max_size=4000)
+    rotated = apply_rotation(full_img, s['rotation'])
 
     if preset_name in PRESETS:
         result = apply_preset(rotated, PRESETS[preset_name])
@@ -144,13 +148,13 @@ def download():
         result = rotated
 
     uint8 = (np.clip(result, 0, 1) * 255).astype(np.uint8)
-    pil = Image.fromarray(uint8)
+    pil = Image.fromarray(uint8, 'RGB')
     buf = io.BytesIO()
-    pil.save(buf, format='JPEG', quality=95)
+    pil.save(buf, format='PNG')
     buf.seek(0)
 
-    filename = f"edited_{preset_name.replace(' ', '_')}.jpg"
-    return send_file(buf, mimetype='image/jpeg', as_attachment=True, download_name=filename)
+    filename = f"edited_{preset_name.replace(' ', '_')}.png"
+    return send_file(buf, mimetype='image/png', as_attachment=True, download_name=filename)
 
 
 if __name__ == '__main__':
