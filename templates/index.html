@@ -57,13 +57,16 @@
     display: none;
     max-width: 100%;
     max-height: 100%;
+    display: none;
+    align-items: center;
+    justify-content: center;
   }
   .image-stack img {
     max-width: 100%;
-    max-height: calc(100vh - 48px - 40px);
+    max-height: calc(100vh - 48px - 100px);
     object-fit: contain;
     border-radius: 2px;
-    transition: transform 0.2s ease;
+    transition: transform 0.3s ease;
     display: block;
   }
   .image-stack .img-overlay {
@@ -76,20 +79,13 @@
   }
 
   .intensity-bar {
-    position: absolute;
-    bottom: 56px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: none;
+    display: flex;
     align-items: center;
     gap: 8px;
-    background: rgba(0,0,0,0.7);
-    padding: 5px 12px;
-    border-radius: 5px;
-    border: 1px solid #333;
-    z-index: 10;
+    padding: 8px 12px;
+    border-bottom: 1px solid #222;
+    flex-shrink: 0;
   }
-  .intensity-bar.visible { display: flex; }
   .intensity-bar label {
     font-size: 10px;
     color: #555;
@@ -100,7 +96,7 @@
   .intensity-bar input[type=range] {
     -webkit-appearance: none;
     appearance: none;
-    width: 140px;
+    flex: 1;
     height: 2px;
     background: #333;
     border-radius: 1px;
@@ -314,7 +310,7 @@
 <body>
 
 <div class="topbar">
-  <h1>PRESET</h1>
+  <div></div>
   <div class="topbar-actions">
     <button class="btn" id="uploadBtn" onclick="document.getElementById('fileInput').click()">Upload</button>
     <button class="btn btn-primary" id="downloadBtn" disabled onclick="downloadImage()">
@@ -333,11 +329,6 @@
     <div class="image-stack" id="imageStack">
       <img id="baseImage" />
       <img id="overlayImage" class="img-overlay" />
-    </div>
-    <div class="intensity-bar" id="intensityBar">
-      <label>Intensity</label>
-      <input type="range" id="intensitySlider" min="0" max="100" value="100" oninput="setIntensity(this.value)">
-      <span class="intensity-val" id="intensityVal">100</span>
     </div>
     <div class="rotate-controls" id="rotateControls" style="display:none">
       <button class="rotate-btn" onclick="rotateImage(-90)" title="Rotate left">
@@ -362,6 +353,11 @@
     <div class="sidebar-header">
       Presets
       <span class="preset-count" id="presetCount"></span>
+    </div>
+    <div class="intensity-bar" id="intensityBar">
+      <label>Intensity</label>
+      <input type="range" id="intensitySlider" min="0" max="100" value="100" oninput="setIntensity(this.value)">
+      <span class="intensity-val" id="intensityVal">100</span>
     </div>
     <div class="preset-list" id="presetList"></div>
   </div>
@@ -403,15 +399,41 @@ function normalizedRotation() {
 }
 
 function applyRotation() {
-  // Main images use accumulated value so CSS transition always goes the right direction
-  document.getElementById('baseImage').style.transform = `rotate(${rotation}deg)`;
-  document.getElementById('overlayImage').style.transform = `rotate(${rotation}deg)`;
-  // Thumbnails use normalized value, no transition
+  const base = document.getElementById('baseImage');
+  const overlay = document.getElementById('overlayImage');
   const norm = normalizedRotation();
+  const isVertical = (norm === 90 || norm === 270);
+
+  let transform = `rotate(${rotation}deg)`;
+
+  if (isVertical && base.naturalWidth && base.naturalHeight) {
+    // When rotated 90/270, the image's width becomes its height and vice versa.
+    // Scale down so the rotated image fits within the container.
+    const container = document.getElementById('mainArea');
+    const maxW = container.clientWidth - 40;  // padding
+    const maxH = container.clientHeight - 100; // padding + controls
+
+    // After rotation, visual width = naturalHeight, visual height = naturalWidth
+    // But we also need to fit within the original (unrotated) constraints
+    const imgW = base.clientWidth;
+    const imgH = base.clientHeight;
+
+    // The rotated image needs imgH as width and imgW as height
+    // Scale so rotated dims fit in container
+    const scaleW = maxW / imgH;
+    const scaleH = maxH / imgW;
+    const scale = Math.min(scaleW, scaleH, 1);
+
+    transform = `rotate(${rotation}deg) scale(${scale})`;
+  }
+
+  base.style.transform = transform;
+  overlay.style.transform = transform;
+
+  // Thumbnails: normalized, no transition
   document.querySelectorAll('.preset-item img').forEach(el => {
     el.style.transform = `rotate(${norm}deg)`;
   });
-  const isVertical = (norm === 90 || norm === 270);
   document.getElementById('presetList').classList.toggle('rotated-vertical', isVertical);
 }
 
@@ -477,7 +499,6 @@ async function handleUpload(e) {
     document.getElementById('imageStack').style.display = 'block';
     document.getElementById('uploadZone').style.display = 'none';
     document.getElementById('rotateControls').style.display = 'flex';
-    document.getElementById('intensityBar').classList.add('visible');
     document.getElementById('sidebar').classList.add('visible');
     document.getElementById('hints').classList.add('visible');
     document.getElementById('downloadBtn').disabled = false;
