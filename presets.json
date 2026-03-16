@@ -1,0 +1,584 @@
+{
+  "Original": {},
+
+  "Fuji Provia Standard": {
+    "contrast": 0.10,
+    "vibrance": 0.15,
+    "saturation": 0.05,
+    "sharpen": 0.20,
+    "curve": [[0, 0.0], [0.5, 0.52], [1, 1.0]]
+  },
+
+  "Fuji Velvia": {
+    "contrast": 0.35,
+    "vibrance": 0.65,
+    "saturation": 0.30,
+    "curve": [[0, 0.0], [0.3, 0.28], [0.7, 0.78], [1, 1.0]],
+    "sharpen": 0.30,
+    "vignette": -0.15
+  },
+
+  "Fuji Astia Soft": {
+    "contrast": -0.20,
+    "exposure": 0.10,
+    "saturation": -0.10,
+    "vibrance": 0.10,
+    "temperature": 0.05,
+    "curve": [[0, 0.04], [0.5, 0.53], [1, 0.96]],
+    "split_tone": {
+      "shadow_hue": 200, "shadow_sat": 0.08,
+      "highlight_hue": 30, "highlight_sat": 0.06
+    }
+  },
+
+  "Fuji Classic Chrome": {
+    "contrast": 0.05,
+    "saturation": -0.30,
+    "vibrance": -0.10,
+    "temperature": -0.08,
+    "curve": [[0, 0.03], [0.4, 0.38], [0.75, 0.76], [1, 0.94]],
+    "split_tone": {
+      "shadow_hue": 210, "shadow_sat": 0.15,
+      "highlight_hue": 40, "highlight_sat": 0.08
+    },
+    "vignette": -0.20
+  },
+
+  "Fuji Classic Neg": {
+    "exposure": 0.05,
+    "contrast": -0.08,
+    "saturation": -0.15,
+    "temperature": 0.20,
+    "curve": [[0, 0.06], [0.4, 0.44], [0.75, 0.78], [1, 0.93]],
+    "split_tone": {
+      "shadow_hue": 30, "shadow_sat": 0.18,
+      "highlight_hue": 50, "highlight_sat": 0.10
+    },
+    "vignette": -0.15
+  },
+
+  "Fuji Eterna Cinema": {
+    "exposure": -0.05,
+    "contrast": -0.25,
+    "saturation": -0.35,
+    "vibrance": -0.10,
+    "curve": [[0, 0.08], [0.5, 0.50], [1, 0.88]],
+    "split_tone": {
+      "shadow_hue": 195, "shadow_sat": 0.10,
+      "highlight_hue": 45, "highlight_sat": 0.06
+    }
+  },
+
+  "Fuji Eterna Bleach Bypass": {
+    "contrast": 0.45,
+    "saturation": -0.55,
+    "curve": [[0, 0.0], [0.2, 0.14], [0.5, 0.50], [0.8, 0.88], [1, 1.0]],
+    "sharpen": 0.35,
+    "vignette": -0.25
+  },
+
+  "Fuji Nostalgic Neg": {
+    "exposure": 0.08,
+    "contrast": -0.12,
+    "saturation": -0.20,
+    "temperature": 0.25,
+    "tint": 0.05,
+    "curve": [[0, 0.07], [0.4, 0.45], [0.8, 0.82], [1, 0.93]],
+    "split_tone": {
+      "shadow_hue": 30, "shadow_sat": 0.22,
+      "highlight_hue": 190, "highlight_sat": 0.12
+    },
+    "vignette": -0.20
+  },
+
+  "Fuji Acros B&W": {
+    "saturation": -1.0,
+    "contrast": 0.25,
+    "curve": [[0, 0.0], [0.15, 0.10], [0.5, 0.50], [0.85, 0.92], [1, 1.0]],
+    "sharpen": 0.40,
+    "vignette": -0.20
+  },
+
+  "Fuji Acros Red Filter": {
+    "saturation": -1.0,
+    "contrast": 0.40,
+    "curve_r": [[0, 0.0], [0.5, 0.65], [1, 1.0]],
+    "curve_g": [[0, 0.0], [0.5, 0.40], [1, 0.85]],
+    "curve_b": [[0, 0.0], [0.5, 0.30], [1, 0.70]],
+    "sharpen": 0.35,
+    "vignette": -0.30
+  },
+
+  "Kodak Portra 160": {
+    "exposure": 0.05,
+    "contrast": -0.10,
+    "temperature": 0.12,
+    "tint": 0.04,
+    "saturation": -0.08,
+    "vibrance": 0.08,
+    "curve": [[0, 0.02], [0.4, 0.41], [0.75, 0.77], [1, 0.95]],
+    "split_tone": {
+      "shadow_hue": 25, "shadow_sat": 0.08,
+      "highlight_hue": 40, "highlight_sat": 0.06
+    }
+  },
+
+  "Kodak Portra 400": {
+    "exposure": 0.08,
+    "contrast": -0.08,
+    "temperature": 0.20,
+    "tint": 0.05,
+    "saturation": -0.10,
+    "vibrance": 0.10,
+    "curve": [[0, 0.04], [0.4, 0.43], [0.75, 0.78], [1, 0.94]],
+    "split_tone": {
+      "shadow_hue": 28, "shadow_sat": 0.10,
+      "highlight_hue": 42, "highlight_sat": 0.08
+    },
+    "vignette": -0.15
+  },
+
+  "Kodak Portra 800": {
+    "exposure": 0.10,
+    "contrast": -0.05,
+    "temperature": 0.28,
+    "saturation": -0.12,
+    "vibrance": 0.08,
+    "curve": [[0, 0.05], [0.4, 0.44], [0.75, 0.79], [1, 0.93]],
+    "split_tone": {
+      "shadow_hue": 30, "shadow_sat": 0.14,
+      "highlight_hue": 45, "highlight_sat": 0.10
+    },
+    "vignette": -0.20
+  },
+
+  "Kodak Ektar 100": {
+    "contrast": 0.20,
+    "vibrance": 0.40,
+    "saturation": 0.15,
+    "temperature": 0.05,
+    "curve": [[0, 0.0], [0.3, 0.28], [0.7, 0.76], [1, 1.0]],
+    "sharpen": 0.25,
+    "vignette": -0.10
+  },
+
+  "Kodak Gold 200": {
+    "exposure": 0.08,
+    "contrast": 0.05,
+    "temperature": 0.30,
+    "tint": 0.06,
+    "saturation": 0.05,
+    "curve": [[0, 0.02], [0.5, 0.53], [1, 0.97]],
+    "split_tone": {
+      "shadow_hue": 35, "shadow_sat": 0.15,
+      "highlight_hue": 50, "highlight_sat": 0.12
+    },
+    "vignette": -0.15
+  },
+
+  "Kodak ColorPlus 200": {
+    "contrast": 0.10,
+    "saturation": 0.10,
+    "temperature": 0.25,
+    "tint": 0.08,
+    "curve": [[0, 0.01], [0.5, 0.52], [1, 0.98]],
+    "split_tone": {
+      "shadow_hue": 40, "shadow_sat": 0.12,
+      "highlight_hue": 55, "highlight_sat": 0.10
+    }
+  },
+
+  "Kodak UltraMax 400": {
+    "contrast": 0.15,
+    "saturation": 0.15,
+    "temperature": 0.18,
+    "vibrance": 0.20,
+    "curve": [[0, 0.0], [0.3, 0.29], [0.7, 0.74], [1, 1.0]],
+    "curve_g": [[0, 0.0], [0.5, 0.53], [1, 1.0]],
+    "vignette": -0.15
+  },
+
+  "Kodak Tri-X 400 B&W": {
+    "saturation": -1.0,
+    "contrast": 0.30,
+    "exposure": -0.05,
+    "curve": [[0, 0.0], [0.2, 0.16], [0.5, 0.50], [0.8, 0.86], [1, 1.0]],
+    "sharpen": 0.30,
+    "vignette": -0.35
+  },
+
+  "Kodak T-MAX 3200 B&W": {
+    "saturation": -1.0,
+    "contrast": 0.20,
+    "exposure": -0.08,
+    "curve": [[0, 0.0], [0.25, 0.18], [0.5, 0.50], [0.85, 0.88], [1, 1.0]],
+    "sharpen": 0.20,
+    "vignette": -0.40
+  },
+
+  "Kodachrome 64": {
+    "contrast": 0.25,
+    "saturation": 0.15,
+    "temperature": 0.20,
+    "tint": 0.05,
+    "curve": [[0, 0.0], [0.25, 0.22], [0.75, 0.82], [1, 1.0]],
+    "curve_r": [[0, 0.0], [0.5, 0.58], [1, 1.0]],
+    "curve_b": [[0, 0.0], [0.4, 0.42], [1, 0.90]],
+    "split_tone": {
+      "shadow_hue": 220, "shadow_sat": 0.15,
+      "highlight_hue": 30, "highlight_sat": 0.18
+    },
+    "vignette": -0.20
+  },
+
+  "Fuji Pro 400H": {
+    "exposure": 0.12,
+    "contrast": -0.15,
+    "temperature": -0.05,
+    "tint": 0.04,
+    "saturation": -0.08,
+    "vibrance": 0.05,
+    "curve": [[0, 0.05], [0.4, 0.44], [0.75, 0.79], [1, 0.97]],
+    "split_tone": {
+      "shadow_hue": 200, "shadow_sat": 0.08,
+      "highlight_hue": 50, "highlight_sat": 0.06
+    }
+  },
+
+  "Fuji Superia 100": {
+    "contrast": 0.05,
+    "saturation": 0.05,
+    "temperature": 0.05,
+    "tint": -0.04,
+    "curve": [[0, 0.01], [0.5, 0.51], [1, 0.99]],
+    "split_tone": {
+      "shadow_hue": 80, "shadow_sat": 0.08,
+      "highlight_hue": 50, "highlight_sat": 0.05
+    }
+  },
+
+  "Fuji Superia 400": {
+    "contrast": 0.12,
+    "saturation": 0.08,
+    "temperature": 0.08,
+    "tint": -0.06,
+    "curve": [[0, 0.0], [0.5, 0.52], [1, 1.0]],
+    "curve_g": [[0, 0.0], [0.5, 0.52], [1, 1.0]],
+    "vignette": -0.12
+  },
+
+  "Fuji Superia 1600": {
+    "contrast": 0.15,
+    "saturation": -0.10,
+    "temperature": -0.05,
+    "exposure": 0.05,
+    "curve": [[0, 0.0], [0.3, 0.24], [0.7, 0.76], [1, 0.98]],
+    "vignette": -0.25
+  },
+
+  "Fuji Neopan 1600 B&W": {
+    "saturation": -1.0,
+    "contrast": 0.35,
+    "exposure": -0.10,
+    "curve": [[0, 0.0], [0.2, 0.12], [0.5, 0.50], [0.85, 0.90], [1, 1.0]],
+    "sharpen": 0.25,
+    "vignette": -0.45
+  },
+
+  "Ilford HP5 400 B&W": {
+    "saturation": -1.0,
+    "contrast": 0.20,
+    "curve": [[0, 0.0], [0.2, 0.18], [0.5, 0.50], [0.8, 0.84], [1, 1.0]],
+    "sharpen": 0.25,
+    "vignette": -0.35
+  },
+
+  "Ilford Delta 3200 B&W": {
+    "saturation": -1.0,
+    "contrast": 0.25,
+    "exposure": -0.05,
+    "curve": [[0, 0.0], [0.25, 0.16], [0.5, 0.49], [0.85, 0.90], [1, 1.0]],
+    "sharpen": 0.15,
+    "vignette": -0.50
+  },
+
+  "Ilford FP4 125 B&W": {
+    "saturation": -1.0,
+    "contrast": 0.10,
+    "curve": [[0, 0.0], [0.2, 0.20], [0.5, 0.50], [0.8, 0.82], [1, 1.0]],
+    "sharpen": 0.35,
+    "vignette": -0.20
+  },
+
+  "Ilford XP2 B&W": {
+    "saturation": -1.0,
+    "contrast": 0.08,
+    "temperature": 0.05,
+    "curve": [[0, 0.01], [0.4, 0.42], [0.75, 0.77], [1, 0.97]],
+    "split_tone": {
+      "shadow_hue": 30, "shadow_sat": 0.06,
+      "highlight_hue": 40, "highlight_sat": 0.04
+    },
+    "vignette": -0.18
+  },
+
+  "VSCO A4 Warm Analog": {
+    "exposure": 0.08,
+    "contrast": -0.12,
+    "temperature": 0.25,
+    "saturation": -0.15,
+    "vibrance": 0.05,
+    "curve": [[0, 0.05], [0.4, 0.43], [0.8, 0.82], [1, 0.94]],
+    "split_tone": {
+      "shadow_hue": 30, "shadow_sat": 0.12,
+      "highlight_hue": 45, "highlight_sat": 0.08
+    },
+    "vignette": -0.15
+  },
+
+  "VSCO A6 Golden": {
+    "exposure": 0.12,
+    "contrast": -0.08,
+    "temperature": 0.35,
+    "saturation": -0.10,
+    "vibrance": 0.10,
+    "curve": [[0, 0.06], [0.5, 0.54], [1, 0.95]],
+    "split_tone": {
+      "shadow_hue": 40, "shadow_sat": 0.15,
+      "highlight_hue": 55, "highlight_sat": 0.12
+    },
+    "vignette": -0.18
+  },
+
+  "VSCO C1 Clean Cool": {
+    "exposure": 0.10,
+    "contrast": 0.05,
+    "temperature": -0.15,
+    "saturation": -0.05,
+    "vibrance": 0.10,
+    "curve": [[0, 0.02], [0.5, 0.52], [1, 0.98]],
+    "vignette": -0.10
+  },
+
+  "VSCO F2 Faded Matte": {
+    "exposure": 0.05,
+    "contrast": -0.25,
+    "saturation": -0.30,
+    "temperature": 0.10,
+    "curve": [[0, 0.10], [0.5, 0.52], [1, 0.88]],
+    "vignette": -0.20
+  },
+
+  "VSCO G3 Earthy Moody": {
+    "exposure": -0.05,
+    "contrast": 0.10,
+    "temperature": 0.20,
+    "saturation": -0.20,
+    "vibrance": 0.05,
+    "curve": [[0, 0.03], [0.4, 0.40], [0.8, 0.82], [1, 0.96]],
+    "split_tone": {
+      "shadow_hue": 35, "shadow_sat": 0.18,
+      "highlight_hue": 50, "highlight_sat": 0.08
+    },
+    "vignette": -0.30
+  },
+
+  "VSCO HB1 High Contrast B&W": {
+    "saturation": -1.0,
+    "contrast": 0.45,
+    "curve": [[0, 0.0], [0.15, 0.08], [0.5, 0.50], [0.85, 0.94], [1, 1.0]],
+    "sharpen": 0.40,
+    "vignette": -0.40
+  },
+
+  "VSCO M5 Rust": {
+    "exposure": 0.08,
+    "contrast": -0.05,
+    "saturation": -0.25,
+    "vibrance": -0.08,
+    "temperature": 0.18,
+    "curve": [[0, 0.04], [0.5, 0.52], [1, 0.93]],
+    "split_tone": {
+      "shadow_hue": 20, "shadow_sat": 0.15,
+      "highlight_hue": 35, "highlight_sat": 0.10
+    },
+    "vignette": -0.15
+  },
+
+  "VSCO P5 Cool Minimal": {
+    "exposure": 0.08,
+    "contrast": -0.05,
+    "temperature": -0.20,
+    "saturation": -0.10,
+    "vibrance": 0.05,
+    "curve": [[0, 0.03], [0.5, 0.52], [1, 0.97]],
+    "split_tone": {
+      "shadow_hue": 205, "shadow_sat": 0.10,
+      "highlight_hue": 195, "highlight_sat": 0.06
+    },
+    "vignette": -0.08
+  },
+
+  "Cinematic Warm Orange Teal": {
+    "contrast": 0.15,
+    "exposure": -0.05,
+    "saturation": 0.05,
+    "curve": [[0, 0.02], [0.5, 0.50], [1, 0.97]],
+    "curve_r": [[0, 0.0], [0.5, 0.55], [1, 1.0]],
+    "curve_b": [[0, 0.05], [0.5, 0.45], [1, 0.92]],
+    "split_tone": {
+      "shadow_hue": 185, "shadow_sat": 0.30,
+      "highlight_hue": 30, "highlight_sat": 0.22
+    },
+    "vignette": -0.35
+  },
+
+  "Matte Faded": {
+    "contrast": -0.15,
+    "curve": [[0, 0.08], [0.5, 0.5], [1, 0.90]],
+    "temperature": 0.15,
+    "saturation": -0.20,
+    "split_tone": {
+      "shadow_hue": 30, "shadow_sat": 0.12,
+      "highlight_hue": 50, "highlight_sat": 0.08
+    },
+    "vignette": -0.30
+  },
+
+  "Dark & Moody": {
+    "exposure": -0.20,
+    "contrast": 0.35,
+    "saturation": -0.15,
+    "temperature": -0.05,
+    "curve": [[0, 0.0], [0.2, 0.10], [0.5, 0.46], [0.85, 0.88], [1, 0.97]],
+    "split_tone": {
+      "shadow_hue": 220, "shadow_sat": 0.20,
+      "highlight_hue": 35, "highlight_sat": 0.08
+    },
+    "vignette": -0.55,
+    "sharpen": 0.25
+  },
+
+  "Airy & Bright": {
+    "exposure": 0.30,
+    "contrast": -0.25,
+    "temperature": 0.10,
+    "saturation": -0.10,
+    "vibrance": 0.10,
+    "curve": [[0, 0.12], [0.5, 0.60], [1, 1.0]],
+    "vignette": -0.05
+  },
+
+  "Urban Fade": {
+    "exposure": -0.08,
+    "contrast": 0.15,
+    "saturation": -0.35,
+    "temperature": -0.05,
+    "curve": [[0, 0.06], [0.5, 0.49], [1, 0.90]],
+    "split_tone": {
+      "shadow_hue": 215, "shadow_sat": 0.10,
+      "highlight_hue": 200, "highlight_sat": 0.05
+    },
+    "vignette": -0.30
+  },
+
+  "Agfa Vista 200": {
+    "contrast": 0.15,
+    "saturation": 0.20,
+    "vibrance": 0.20,
+    "temperature": 0.05,
+    "tint": -0.08,
+    "curve": [[0, 0.0], [0.3, 0.27], [0.7, 0.76], [1, 1.0]],
+    "curve_g": [[0, 0.0], [0.5, 0.54], [1, 1.0]],
+    "vignette": -0.18
+  },
+
+  "Agfa Precisa CT100 Cross": {
+    "contrast": 0.30,
+    "saturation": 0.25,
+    "curve_r": [[0, 0.0], [0.4, 0.52], [1, 1.0]],
+    "curve_g": [[0, 0.05], [0.5, 0.44], [1, 0.88]],
+    "curve_b": [[0, 0.08], [0.5, 0.58], [1, 0.85]],
+    "split_tone": {
+      "shadow_hue": 55, "shadow_sat": 0.22,
+      "highlight_hue": 195, "highlight_sat": 0.18
+    },
+    "vignette": -0.30
+  },
+
+  "Polaroid 600": {
+    "exposure": 0.10,
+    "contrast": -0.18,
+    "saturation": -0.20,
+    "temperature": 0.10,
+    "tint": 0.05,
+    "curve": [[0, 0.08], [0.4, 0.44], [0.8, 0.82], [1, 0.93]],
+    "split_tone": {
+      "shadow_hue": 190, "shadow_sat": 0.12,
+      "highlight_hue": 50, "highlight_sat": 0.08
+    },
+    "vignette": -0.25
+  },
+
+  "Lomo LC-A": {
+    "contrast": 0.30,
+    "saturation": 0.25,
+    "temperature": -0.08,
+    "curve": [[0, 0.0], [0.25, 0.18], [0.5, 0.52], [0.75, 0.82], [1, 1.0]],
+    "split_tone": {
+      "shadow_hue": 55, "shadow_sat": 0.20,
+      "highlight_hue": 195, "highlight_sat": 0.15
+    },
+    "vignette": -0.65,
+    "sharpen": 0.20
+  },
+
+  "Cinestill 800T": {
+    "exposure": -0.05,
+    "contrast": 0.10,
+    "temperature": -0.40,
+    "tint": -0.08,
+    "saturation": 0.05,
+    "curve": [[0, 0.02], [0.3, 0.26], [0.7, 0.75], [1, 0.98]],
+    "curve_r": [[0, 0.05], [0.5, 0.58], [1, 1.0]],
+    "curve_b": [[0, 0.08], [0.5, 0.60], [1, 1.0]],
+    "split_tone": {
+      "shadow_hue": 200, "shadow_sat": 0.25,
+      "highlight_hue": 350, "highlight_sat": 0.15
+    },
+    "vignette": -0.30
+  },
+
+  "Cinestill 50D": {
+    "contrast": 0.05,
+    "saturation": 0.05,
+    "temperature": 0.05,
+    "curve": [[0, 0.01], [0.5, 0.51], [1, 0.99]],
+    "sharpen": 0.15,
+    "vignette": -0.10
+  },
+
+  "Kodak Ektachrome E100 Slide": {
+    "contrast": 0.25,
+    "saturation": 0.20,
+    "vibrance": 0.15,
+    "temperature": 0.05,
+    "curve": [[0, 0.0], [0.3, 0.27], [0.7, 0.78], [1, 1.0]],
+    "curve_b": [[0, 0.0], [0.5, 0.52], [1, 1.0]],
+    "sharpen": 0.20,
+    "vignette": -0.15
+  },
+
+  "Cross Process": {
+    "contrast": 0.35,
+    "saturation": 0.30,
+    "curve_r": [[0, 0.0], [0.4, 0.50], [1, 1.0]],
+    "curve_g": [[0, 0.05], [0.5, 0.45], [1, 0.90]],
+    "curve_b": [[0, 0.10], [0.5, 0.60], [1, 0.85]],
+    "split_tone": {
+      "shadow_hue": 55, "shadow_sat": 0.25,
+      "highlight_hue": 195, "highlight_sat": 0.20
+    },
+    "vignette": -0.30
+  }
+}
