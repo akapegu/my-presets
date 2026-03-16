@@ -78,32 +78,34 @@
 
   .hints {
     display: none;
-    flex-direction: column;
-    justify-content: center;
-    gap: 10px;
-    padding: 0 10px;
-    flex-shrink: 0;
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    align-items: center;
+    gap: 14px;
+    z-index: 10;
   }
   .hints.visible { display: flex; }
   .hint {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 10px;
+    gap: 4px;
+    font-size: 9px;
     color: #444;
+    white-space: nowrap;
   }
   .key {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 22px;
-    height: 20px;
-    padding: 0 5px;
-    border: 1px solid #333;
+    min-width: 18px;
+    height: 16px;
+    padding: 0 4px;
+    border: 1px solid #2a2a2a;
     border-radius: 3px;
-    font-size: 9px;
-    color: #555;
-    background: #151515;
+    font-size: 8px;
+    color: #444;
+    background: #131313;
     font-family: inherit;
     line-height: 1;
   }
@@ -234,12 +236,11 @@
       <button class="rotate-btn" onclick="rotateImage(-90)" title="Rotate left">&#x21BA;</button>
       <button class="rotate-btn" onclick="rotateImage(90)" title="Rotate right">&#x21BB;</button>
     </div>
-  </div>
-
-  <div class="hints" id="hints">
-    <div class="hint"><span class="key">Space</span> Original</div>
-    <div class="hint"><span class="key">&uarr;</span> Prev</div>
-    <div class="hint"><span class="key">&darr;</span> Next</div>
+    <div class="hints" id="hints">
+      <div class="hint"><span class="key">Space</span> Original</div>
+      <div class="hint"><span class="key">&uarr;</span> Prev</div>
+      <div class="hint"><span class="key">&darr;</span> Next</div>
+    </div>
   </div>
 
   <div class="sidebar" id="sidebar">
